@@ -10,63 +10,62 @@ from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 
 from dotenv import load_dotenv, find_dotenv
 
-from ExtendedConversationBufferMemory import  ExtendedConversationSummaryMemory
+from ExtendedConversationBufferMemory import ExtendedConversationMemory
 
 _ = load_dotenv(find_dotenv()) # read local .env file
 
 
-def chat(query: str, llm_model="gpt-3.5-turbo"):
+def chat_with_specialist(query: str, patient_information: List[str], collected_patient_information: List[str]):
     llm = ChatOpenAI(
         temperature=0,
         openai_api_key=os.environ["OPENAI_API_KEY"],
-        model=llm_model
+        model='gpt-4'
     )
 
-    template = """The following is a friendly conversation between a human patient and an AI doctor. The AI is friendly and caring towards a patient. If the AI does not know the answer to a question, it truthfully says it does not know.
-    The doctor would continue to ask about the patient's information {all_needed_information}.
-    The remaining patient information that is needed to be asked are {remaining_patient_information}.
-    Format the output as a JSON wherein the response key is your response, and the remaining_patient_information key to store the remaining patient 
-    information that you needed to ask from the patient. 
+    template = """The following is a friendly conversation between a human patient and an AI diabetes predictor specialist. The AI is caring towards a patient. If the AI does not know the answer to a question, it truthfully says it does not know.
+    The specialist would continue to ask about the patient's information: {patient_information}. The AI specialist would also store the information 
+    given by the patient as collected_patient_information. Some of the information asked are questions only answerable by yes or no. The 
+    collected information so far are {collected_information}. Do not ask anymore if it has been answered in the collected information. 
+    Don't stop asking until all the information have been collected. 
     
     Current conversation:
     {history}
-    AI Doctor: Let me get your patient information so that I can diagnose if you are prediabetes or not.
     Human: {input}
-    AI Doctor: 
+    AI Specialist: 
     {format_instructions}
     """
 
     patient_information_schema = ResponseSchema(name="remaining_patient_information",
                                                 description="This is the remaining patient information that is needed to be asked.")
 
+    collected_patient_information_schema = ResponseSchema(name="collected_patient_information", type="JSON object (you may shorten the key)",
+                                                          description="The collected patient information. This includes information computed by AI that is needed. (i.e. BMI from Height/Weight)")
 
+    doctor_response_schema = ResponseSchema(name="AI response", description="AI Specialist current response")
 
-    response_schemas = [patient_information_schema]
+    can_stop_asking_schema = ResponseSchema(name='can_stop_asking', type="Boolean", description="Whether the AI can stop asking or not.")
+
+    response_schemas = [patient_information_schema, collected_patient_information_schema, doctor_response_schema, can_stop_asking_schema]
     output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
     format_instructions = output_parser.get_format_instructions()
 
     prompt = PromptTemplate(
-        input_variables=["history", "input", "all_needed_information", "remaining_patient_information"],
+        input_variables=["history", "input", "patient_information", "collected_information"],
         template=template
         , partial_variables={"format_instructions": format_instructions})
-    # now initialize the conversation chain
+
     conversation = ConversationChain(llm=llm, prompt=prompt, verbose=True,
-                                     memory=ExtendedConversationSummaryMemory(llm=llm, ai_prefix="AI Doctor",
-                                                                              extra_variables=["all_needed_information", "remaining_patient_information"]))
+                                     memory=ExtendedConversationMemory(llm=llm, ai_prefix="AI Specialist", k=2,
+                                                                              extra_variables=["patient_information", "collected_information"])
+                                     )
 
-    convo = conversation({'input' : 'Hi Doctor, I am a 23 year old male. I want to know if i have diabetes or not.',
-                          'remaining_patient_information' : 'BMI, Sex, Age, Has a history of Heart disease',
-                          'all_needed_information' : 'BMI, Sex, Age, Has a history of Heart disease'})
+    convo = conversation({'input': query,
+                         'patient_information': patient_information,
+                          'collected_information': collected_patient_information}
+                        )
     response_as_dict = output_parser.parse(convo['response'])
-    print(convo['response'])
 
-    remaining_needed_information = response_as_dict['remaining_patient_information']
-
-    convo = conversation({'input': 'I have a height of 160cm and weight of 85kg',
-                          'remaining_patient_information': ', '.join(remaining_needed_information),
-                          'all_needed_information': 'BMI, Sex, Age, Has a history of Heart disease'})
-
-    print(convo['response'])
+    return convo, response_as_dict
 
 def run_llm(query: str, llm_model="gpt-3.5-turbo"):
 
@@ -125,5 +124,5 @@ def run_llm(query: str, llm_model="gpt-3.5-turbo"):
 
     print(result)
 
-if __name__ == "__main__":
-    chat("", llm_model="gpt-4")
+# if __name__ == "__main__":
+#     chat("", llm_model="gpt-4")

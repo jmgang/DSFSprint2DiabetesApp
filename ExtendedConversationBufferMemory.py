@@ -1,9 +1,9 @@
 from typing import List, Dict, Any
 
-from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
+from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory, ConversationBufferWindowMemory
 
 
-class ExtendedConversationSummaryMemory(ConversationSummaryMemory):
+class ExtendedConversationMemory(ConversationBufferWindowMemory):
     extra_variables:List[str] = []
 
     @property
