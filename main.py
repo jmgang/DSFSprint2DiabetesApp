@@ -1,5 +1,3 @@
-from typing import Set
-import ast
 import json
 import pandas as pd
 import pickle
@@ -34,23 +32,6 @@ if (
     st.session_state["user_prompt_history"] = []
     st.session_state["chat_history"] = []
     st.session_state["collected_information"] = []
-
-
-# all_needed_information = ['Age', 'Sex', 'BMI', 'Have you smoked at least 100 cigarettes in your entire life?',
-#                            'Do you have high bp', 'Do you have high chol',
-#                           'Have you had a stroke?', 'Have you had a heart disease?',
-#                           'Have you had phys activity in the past 30 days?', 'Have you consumed fruits 1 to more times a day?',
-#                           'Have you had a chol check in the last 5 yrs?', 'Have you consumed veggies 1 to more times a day?',
-#                           'How many alcoholic drinks have you consumed per week? (adult men >=14, women >= 7)',
-#                           'Have any kind of health care coverage, including health insurance?',
-#                           'Was there a time in the past 12 months when you needed to see a doctor but could not because of cost?',
-#                           'Would you say that in general your health is: scale 1-5 1 = excellent 2 = very good 3 = good 4 = fair 5 = poor',
-#                           'physical illness or injury days in past 30 days scale 1-30',
-#                           'days of poor mental health scale 1-30 days',
-#                           'Do you have serious difficulty walking or climbing stairs? 0 = no 1 = yes',
-#                             'What is your Education level',
-#                           'What is your annual income in USD'
-#                           ]
 
 all_needed_information = ['Age', 'Sex', 'BMI',
                            'Do you have high bp', 'Do you have high chol',

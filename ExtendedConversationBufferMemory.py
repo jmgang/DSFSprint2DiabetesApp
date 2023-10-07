@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory, ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferWindowMemory
 
 
 class ExtendedConversationMemory(ConversationBufferWindowMemory):

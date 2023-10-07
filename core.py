@@ -2,9 +2,7 @@ import os
 from typing import Any, Dict, List
 
 from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.chains import LLMChain, SequentialChain, ConversationChain
-from langchain.chains.conversation.memory import ConversationSummaryMemory
+from langchain.chains import LLMChain, ConversationChain
 from langchain.prompts.prompt import PromptTemplate
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 
