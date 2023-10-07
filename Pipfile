@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 python-dotenv = "*"
+pandas = "*"
+scikit-learn = "*"
+matplotlib = "*"
+plotly = "*"
 
 [dev-packages]
 langchain = "*"
